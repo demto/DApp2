@@ -1,0 +1,19 @@
+using DApp.API.Data.Configs;
+using DApp.API.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace DApp.API.Data
+{
+    public class DataContext : DbContext
+    {
+        public DataContext(DbContextOptions options)
+            :base(options) {}
+
+        public DbSet<Value> Values { get; set; }
+        public DbSet<User> Users { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder){
+            modelBuilder.ApplyConfiguration(new ValueConfigs());
+        }
+    }
+}
