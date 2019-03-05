@@ -9,13 +9,13 @@ namespace DApp.API.Data.Configs
         public void Configure(EntityTypeBuilder<Value> builder)
         {
             // table
-                builder.ToTable("ValueTable");
+                // builder.ToTable("ValueTable");
             // key
 
             // property
-                builder.Property(p => p.Name)
-                .IsRequired()
-                .HasMaxLength(10);
+                // builder.Property(p => p.Name)
+                // .IsRequired()
+                // .HasMaxLength(10);
             // relationship
         }
     }
