@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using AutoMapper;
 using DApp.API.Data;
@@ -37,6 +39,23 @@ namespace DApp.API.Controllers
             var userToReturn = _mapper.Map<UserForDetailedDto>(user);
             
             return Ok(userToReturn);
-        }        
+        }     
+
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateUser(int id, UserForUpdateDto dto) {
+            if (id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)){
+                return Unauthorized();
+            }
+
+            var userFromRepo = await _datingRepo.GetUser(id);
+
+            _mapper.Map(dto, userFromRepo);
+
+            if (await _datingRepo.SaveAll()) {
+                return NoContent();
+            }
+
+            throw new Exception($"Error updating user with id: {id}");
+        }   
     }
 }
