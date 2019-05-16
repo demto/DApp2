@@ -32,7 +32,7 @@ namespace DApp.API.Controllers
             return Ok(usersToReturn);
         }
 
-        [HttpGet("{id}")]
+        [HttpGet("{id}", Name="getuser")]
         public async Task<IActionResult> GetUser(int id)
         {
             var user = await _datingRepo.GetUser(id);

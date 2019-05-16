@@ -41,14 +41,13 @@ namespace DApp.API.Controllers
                 return BadRequest("Username already exists");
             }
 
-            var uesrToCreate = new User()
-            {
-                UserName = userForRegisterDto.UserName
-            };
+            var uesrToCreate = _mapper.Map<User>(userForRegisterDto);
 
             var createdUser = await _repo.RegisterUser(uesrToCreate, userForRegisterDto.Password);
 
-            return StatusCode(201);
+            var userToReturn = _mapper.Map<UserForDetailedDto>(createdUser);
+
+            return CreatedAtRoute("getuser", new {controller = "Users", id = createdUser.Id}, userToReturn);
 
 
         }
