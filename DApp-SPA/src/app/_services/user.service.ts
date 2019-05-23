@@ -1,8 +1,10 @@
 import { Injectable } from '@angular/core';
 import { environment } from 'src/environments/environment';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { HttpClient, HttpHeaders, HttpParams } from '@angular/common/http';
 import { User } from '../_models/user';
 import { Observable } from 'rxjs';
+import { PaginatedResult } from '../_models/pagination';
+import { map } from 'rxjs/operators';
 
 // Below is not needed anymore as JWT token getter was used in app module
 // const httpOptions = {
@@ -20,8 +22,34 @@ export class UserService {
 
 constructor(private httpClient: HttpClient) { }
 
-  getUsers(): Observable<User[]> {
-    return this.httpClient.get<User[]>(this.baseUrl + 'users'); // , httpOptions);
+  getUsers(page?, itemsPerPage?, userParams?): Observable<PaginatedResult<User[]>> {
+    const paginatedResult: PaginatedResult<User[]> = new PaginatedResult<User[]>();
+    let params = new HttpParams();
+
+    if (page != null && itemsPerPage != null) {
+      params = params.append('pageNumber', page);
+      params = params.append('pageSize', itemsPerPage);
+    }
+
+    if (userParams != null) {
+      params = params.append('maxAge', userParams.maxAge);
+      params = params.append('minAge', userParams.minAge);
+      params = params.append('gender', userParams.gender);
+      params = params.append('orderBy', userParams.orderBy);
+    }
+
+    return this.httpClient.get<User[]>(this.baseUrl + 'users', { observe: "response", params })
+      .pipe(
+        map(response => {
+          paginatedResult.result = response.body;
+          if (response.headers.get('Pagination') != null) {
+            paginatedResult.pagination = JSON.parse(
+              response.headers.get('Pagination'));
+          }
+          // paginatedResult.pagination = {currentPage: 1, totalItems: 9, totalPages: 3, itemsPerPage: 5};
+          return paginatedResult;
+        })
+      ); // , httpOptions);
   }
 
   getUser(userId: number): Observable<User> {
