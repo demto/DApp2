@@ -6,6 +6,7 @@ using AutoMapper;
 using DApp.API.Data;
 using DApp.API.DTOs;
 using DApp.API.Helpers;
+using DApp.API.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,5 +71,36 @@ namespace DApp.API.Controllers
 
             throw new Exception($"Error updating user with id: {id}");
         }   
+
+        [HttpPost("{id}/like/{recipientId}")]
+        public async Task<IActionResult> LikeUser(int id, int recipientId) {
+            if(id != int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value)) {
+                return Unauthorized();
+            }
+
+            var likes = await _datingRepo.GetLikes(id, recipientId);
+            if(likes != null) {
+                return BadRequest("You have already liked this person.");
+            }
+
+            var user = await _datingRepo.GetUser(recipientId);
+            if(user == null) {
+                return NotFound();
+            }
+
+            var like = new Like{
+                LikeeId = recipientId,
+                LikerId = id,
+            };
+
+            _datingRepo.Add(like);
+
+            if(await _datingRepo.SaveAll()) {
+                return Ok();
+            }
+
+            return BadRequest("Failed to like user");
+
+        }
     }
 }

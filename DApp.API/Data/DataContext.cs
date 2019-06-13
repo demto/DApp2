@@ -12,9 +12,11 @@ namespace DApp.API.Data
         public DbSet<Value> Values { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Photo> Photos { get; set; }
+        public DbSet<Like> Likes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder){
             modelBuilder.ApplyConfiguration(new ValueConfigs());
+            modelBuilder.ApplyConfiguration(new LikeConfigs());
         }
     }
 }

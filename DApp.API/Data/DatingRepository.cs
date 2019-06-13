@@ -39,6 +39,16 @@ namespace DApp.API.Data
                 .OrderByDescending(u => u.LastActive)
                 .AsQueryable();
 
+            if(userParams.Likers) {
+                var userLikers = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikers.Contains(u.Id));
+            }
+
+            if(userParams.Likees) {
+                var userLikees = await GetUserLikes(userParams.UserId, userParams.Likers);
+                users = users.Where(u => userLikees.Contains(u.Id));
+            }
+
             if(userParams.MaxAge != 0 || userParams.MinAge != 0) {
                 var minDob = DateTime.Today.AddYears(-userParams.MaxAge-1);
                 var maxDob = DateTime.Today.AddYears(-userParams.MinAge);
@@ -63,6 +73,20 @@ namespace DApp.API.Data
             return await PagedList<User>.CreateAsync(users, userParams.PageNumber, userParams.PageSize);
         }
 
+        public async Task<IEnumerable<int>> GetUserLikes(int id, bool likers) {
+            var user = await _context.Users
+                .Include(u => u.Likees)
+                .Include(u => u.Likers)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
+            if (likers) {
+                return user.Likers.Where(u => u.LikeeId == id).Select(i => i.LikerId);
+            }
+            else {
+                return user.Likees.Where(u => u.LikerId == id).Select(i => i.LikeeId);
+            }
+        }
+
         public async Task<bool> SaveAll()
         {
             return await _context.SaveChangesAsync() > 0;
@@ -77,6 +101,12 @@ namespace DApp.API.Data
             return await _context.Photos
                 .Where(u => u.UserId == userId)
                 .FirstOrDefaultAsync(p => p.IsMain);
+        }
+
+        public Task<Like> GetLikes(int id, int recipientId)
+        {
+            var like = _context.Likes.FirstOrDefaultAsync(u => u.LikerId == id && u.LikeeId == recipientId);
+            return like;
         }
     }
 }
