@@ -51,8 +51,8 @@ namespace DApp.API.Controllers
             }
 
             dto.SenderId = userId;
-            var recipient = _datingRepo.GetUser(dto.RecipientId);
-            var sender = _datingRepo.GetUser(dto.SenderId);
+            var recipient = await _datingRepo.GetUser(dto.RecipientId);
+            var sender = await _datingRepo.GetUser(dto.SenderId);
             
             if (recipient == null) {
                 return BadRequest("Cannot find recipient.");
